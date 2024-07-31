@@ -1,0 +1,1 @@
+/home/kalpana/t3store3/public/FullHGcal_simulation/StandAloneSimulation/CMSSW_12_0_0/src/Samples/Skimmed_Files/latest_v/Skimmed_Files/FullHGCALSS_PionEn10to350_eta20_version73_model2.root
