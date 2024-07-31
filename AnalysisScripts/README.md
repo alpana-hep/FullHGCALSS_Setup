@@ -20,12 +20,3 @@ or
 ```
 
 ## Analyzing and making input checks plots
-Input features studies - check with respect to different dRs - NEED to be added
-Code structure here -
-
-```
-cd AnalysisScripts/
-make
-./analyzeHGCOctTB infile.txt out.root 20
-
-```
