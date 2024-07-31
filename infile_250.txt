@@ -1,0 +1,5 @@
+/afs/cern.ch/user/k/kalpana/work/public/hgcalTestBeamOct2018/Hgcal_fullSim_phase2/StandAlonHGCALSim/CMSSW_12_0_0/src/Latest_try/PFCal/HGCStandaloneAnalysis/Geant4_pi-_version73_248_0.root
+/afs/cern.ch/user/k/kalpana/work/public/hgcalTestBeamOct2018/Hgcal_fullSim_phase2/StandAlonHGCALSim/CMSSW_12_0_0/src/Latest_try/PFCal/HGCStandaloneAnalysis/Geant4_pi-_version73_249_0.root
+/afs/cern.ch/user/k/kalpana/work/public/hgcalTestBeamOct2018/Hgcal_fullSim_phase2/StandAlonHGCALSim/CMSSW_12_0_0/src/Latest_try/PFCal/HGCStandaloneAnalysis/Geant4_pi-_version73_250_0.root
+/afs/cern.ch/user/k/kalpana/work/public/hgcalTestBeamOct2018/Hgcal_fullSim_phase2/StandAlonHGCALSim/CMSSW_12_0_0/src/Latest_try/PFCal/HGCStandaloneAnalysis/Geant4_pi-_version73_251_0.root
+/afs/cern.ch/user/k/kalpana/work/public/hgcalTestBeamOct2018/Hgcal_fullSim_phase2/StandAlonHGCALSim/CMSSW_12_0_0/src/Latest_try/PFCal/HGCStandaloneAnalysis/Geant4_pi-_version73_252_0.root

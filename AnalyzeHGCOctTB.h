@@ -132,6 +132,23 @@ class AnalyzeHGCOctTB : public HGCNtupleVariables{
   TH1F* h_bin_total_Mips_EE_v1[5][85];
   TH1F* h_bin_total_Mips_FH_v1[5][85];
 
+  TH2F* h_2D_nsc_correlation[8];
+  TH2F* h_2D_nsc_correlation_frac[8];
+  TH2F* h_2D_hlead_sec_frac[8];
+
+  TH2F* h_2D_nsc_correlation_hadNotfound[8];
+  TH2F* h_2D_nsc_correlation_frac_hadNotfound[8];
+  TH2F* h_2D_hlead_sec_frac_hadNotfound[8];
+
+  //  TH1F* h_true_beamenergy;
+  TH1F* h_nsc[8];
+  TH1F* h_seckin[8];
+  TH1F* h_had_leading_KE[8];
+  TH1F* h_gen_kin[8];
+  TH1F* h_Allsec_kin[8];
+  TH1F* h_Allsec_kin_kaons[8];
+  TH1F* h_Allsec_kin_pions[8];
+
 
 };
 #endif
@@ -165,164 +182,207 @@ void AnalyzeHGCOctTB::BookHistogram(const char *outFileName,  const char* energy
   h_true_beamenergy=new TH1F(hname,hname,2000,0,2000);
   sprintf(hname,"h_particle");
   h_particle = new TH1F(hname,hname,400,-400,400);
-  for(int i=0;i<1;i++)
-    {
+  /* for(int i=0;i<1;i++) */
+  /*   { */
 
-      sprintf(hname,"h_rechitEnergy_Mips_%s",dr_cuts[i]);
-      h_rechitEnergy_Mips[i]= new TH1F(hname,hname,10000,0,1000);
-      sprintf(hname,"h_rechitEnergy_MeVs_%s",dr_cuts[i]);
-      h_rechitEnergy_MeV[i]= new TH1F(hname,hname,500,0,500);
-      sprintf(hname,"h_dR_%s",dr_cuts[i]);
-      h_dR[i]= new TH1F(hname,hname,500,0,5.0);
-      sprintf(hname,"h_nhits_%s",dr_cuts[i]);
-      h_nhits[i]= new TH1F(hname,hname,500,0,6000);
-      sprintf(hname,"h_dR_rechitEnergy_%s",dr_cuts[i]);
-      h_dR_rechitEnergy[i]= new TH2F(hname,hname,500,0,5000,500,0,5);
-      sprintf(hname,"h_dR_rechitEnergy_GeV_%s",dr_cuts[i]);
-      h_dR_rechitEnergy_GeV[i]= new TH2F(hname,hname,500,0,500,500,0,5);
-      sprintf(hname,"h_rechitX_%s",dr_cuts[i]);
-      h_rechitX[i]= new TH1F(hname,hname,600,-300,300);
-      sprintf(hname,"h_rechitY_%s",dr_cuts[i]);
-      h_rechitY[i]= new TH1F(hname,hname,600,-300,300);
-      sprintf(hname,"h_rechitZ_%s",dr_cuts[i]);
-      h_rechitZ[i]= new TH1F(hname,hname,400,200,600);
-      sprintf(hname,"h_rechitXvsY_%s",dr_cuts[i]);
-      h_rechitXvsY[i]= new TH2F(hname,hname,600,-300,300,600,-300,300);
-      sprintf(hname,"h_rechitXvsZ_%s",dr_cuts[i]);
-      h_rechitXvsZ[i]= new TH2F(hname,hname,400,200,600,600,-300,300);
+  /*     sprintf(hname,"h_rechitEnergy_Mips_%s",dr_cuts[i]); */
+  /*     h_rechitEnergy_Mips[i]= new TH1F(hname,hname,10000,0,1000); */
+  /*     sprintf(hname,"h_rechitEnergy_MeVs_%s",dr_cuts[i]); */
+  /*     h_rechitEnergy_MeV[i]= new TH1F(hname,hname,500,0,500); */
+  /*     sprintf(hname,"h_dR_%s",dr_cuts[i]); */
+  /*     h_dR[i]= new TH1F(hname,hname,500,0,5.0); */
+  /*     sprintf(hname,"h_nhits_%s",dr_cuts[i]); */
+  /*     h_nhits[i]= new TH1F(hname,hname,500,0,6000); */
+  /*     sprintf(hname,"h_dR_rechitEnergy_%s",dr_cuts[i]); */
+  /*     h_dR_rechitEnergy[i]= new TH2F(hname,hname,500,0,5000,500,0,5); */
+  /*     sprintf(hname,"h_dR_rechitEnergy_GeV_%s",dr_cuts[i]); */
+  /*     h_dR_rechitEnergy_GeV[i]= new TH2F(hname,hname,500,0,500,500,0,5); */
+  /*     sprintf(hname,"h_rechitX_%s",dr_cuts[i]); */
+  /*     h_rechitX[i]= new TH1F(hname,hname,600,-300,300); */
+  /*     sprintf(hname,"h_rechitY_%s",dr_cuts[i]); */
+  /*     h_rechitY[i]= new TH1F(hname,hname,600,-300,300); */
+  /*     sprintf(hname,"h_rechitZ_%s",dr_cuts[i]); */
+  /*     h_rechitZ[i]= new TH1F(hname,hname,400,200,600); */
+  /*     sprintf(hname,"h_rechitXvsY_%s",dr_cuts[i]); */
+  /*     h_rechitXvsY[i]= new TH2F(hname,hname,600,-300,300,600,-300,300); */
+  /*     sprintf(hname,"h_rechitXvsZ_%s",dr_cuts[i]); */
+  /*     h_rechitXvsZ[i]= new TH2F(hname,hname,400,200,600,600,-300,300); */
 
 
-      for(int j=0;j<8;j++)
-	{
-	  sprintf(hname1,"h_bin_rechitEnergy_Mips_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-	  h_bin_rechitEn_Mips[i][j]= new TH1F(hname1,hname1,10000,0,1000);
-	  sprintf(hname1,"h_bin_rechitEnergy_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-	  h_bin_rechitEn[i][j]=new TH1F(hname1,hname1,500,0,500);
-	  sprintf(hname1,"h_bin_rechitX_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-	  h_bin_rechitX[i][j]= new TH1F(hname1,hname1,600,-300,300);
-	  sprintf(hname1,"h_bin_rechitY_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-	  h_bin_rechitY[i][j]= new TH1F(hname1,hname1,600,-300,300);
-	  sprintf(hname1,"h_bin_rechitZ_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-	  h_bin_rechitZ[i][j]= new TH1F(hname1,hname1,400,200,600);
+  /*     for(int j=0;j<8;j++) */
+  /* 	{ */
+  /* 	  sprintf(hname1,"h_bin_rechitEnergy_Mips_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /* 	  h_bin_rechitEn_Mips[i][j]= new TH1F(hname1,hname1,10000,0,1000); */
+  /* 	  sprintf(hname1,"h_bin_rechitEnergy_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /* 	  h_bin_rechitEn[i][j]=new TH1F(hname1,hname1,500,0,500); */
+  /* 	  sprintf(hname1,"h_bin_rechitX_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /* 	  h_bin_rechitX[i][j]= new TH1F(hname1,hname1,600,-300,300); */
+  /* 	  sprintf(hname1,"h_bin_rechitY_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /* 	  h_bin_rechitY[i][j]= new TH1F(hname1,hname1,600,-300,300); */
+  /* 	  sprintf(hname1,"h_bin_rechitZ_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /* 	  h_bin_rechitZ[i][j]= new TH1F(hname1,hname1,400,200,600); */
 
-	  sprintf(hname1,"h_bin_rechitX_EE_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_rechitX_EE[i][j]= new TH1F(hname1,hname1,600,-300,300);
-          sprintf(hname1,"h_bin_rechitY_EE_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_rechitY_EE[i][j]= new TH1F(hname1,hname1,600,-300,300);
-          sprintf(hname1,"h_bin_rechitZ_EE_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_rechitZ_EE[i][j]= new TH1F(hname1,hname1,400,200,600);
+  /* 	  sprintf(hname1,"h_bin_rechitX_EE_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_rechitX_EE[i][j]= new TH1F(hname1,hname1,600,-300,300); */
+  /*         sprintf(hname1,"h_bin_rechitY_EE_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_rechitY_EE[i][j]= new TH1F(hname1,hname1,600,-300,300); */
+  /*         sprintf(hname1,"h_bin_rechitZ_EE_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_rechitZ_EE[i][j]= new TH1F(hname1,hname1,400,200,600); */
 	  
-	  sprintf(hname1,"h_bin_rechitEnergy_Mips_EE_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_rechitEn_Mips_EE[i][j]= new TH1F(hname1,hname1,10000,0,1000);
-          sprintf(hname1,"h_bin_rechitEnergy_EE_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_rechitEn_EE[i][j]=new TH1F(hname1,hname1,500,0,500);
+  /* 	  sprintf(hname1,"h_bin_rechitEnergy_Mips_EE_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_rechitEn_Mips_EE[i][j]= new TH1F(hname1,hname1,10000,0,1000); */
+  /*         sprintf(hname1,"h_bin_rechitEnergy_EE_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_rechitEn_EE[i][j]=new TH1F(hname1,hname1,500,0,500); */
 
 
-          sprintf(hname1,"h_bin_rechitX_FH_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_rechitX_FH[i][j]= new TH1F(hname1,hname1,600,-300,300);
-          sprintf(hname1,"h_bin_rechitY_FH_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_rechitY_FH[i][j]= new TH1F(hname1,hname1,600,-300,300);
-          sprintf(hname1,"h_bin_rechitZ_FH_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_rechitZ_FH[i][j]= new TH1F(hname1,hname1,400,200,600);
+  /*         sprintf(hname1,"h_bin_rechitX_FH_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_rechitX_FH[i][j]= new TH1F(hname1,hname1,600,-300,300); */
+  /*         sprintf(hname1,"h_bin_rechitY_FH_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_rechitY_FH[i][j]= new TH1F(hname1,hname1,600,-300,300); */
+  /*         sprintf(hname1,"h_bin_rechitZ_FH_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_rechitZ_FH[i][j]= new TH1F(hname1,hname1,400,200,600); */
 
-          sprintf(hname1,"h_bin_rechitEnergy_Mips_FH_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_rechitEn_Mips_FH[i][j]= new TH1F(hname1,hname1,10000,0,1000);
-          sprintf(hname1,"h_bin_rechitEnergy_FH_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_rechitEn_FH[i][j]=new TH1F(hname1,hname1,500,0,500);
-	  sprintf(hname,"h_bin_rechitXvsY_FH_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_rechitXvsY_FH[i][j]= new TH2F(hname,hname,600,-300,300,600,-300,300);
-          sprintf(hname,"h_bin_rechitXvsZ_FH_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_rechitXvsZ_FH[i][j]= new TH2F(hname,hname,400,200,600,600,-300,300);
+  /*         sprintf(hname1,"h_bin_rechitEnergy_Mips_FH_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_rechitEn_Mips_FH[i][j]= new TH1F(hname1,hname1,10000,0,1000); */
+  /*         sprintf(hname1,"h_bin_rechitEnergy_FH_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_rechitEn_FH[i][j]=new TH1F(hname1,hname1,500,0,500); */
+  /* 	  sprintf(hname,"h_bin_rechitXvsY_FH_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_rechitXvsY_FH[i][j]= new TH2F(hname,hname,600,-300,300,600,-300,300); */
+  /*         sprintf(hname,"h_bin_rechitXvsZ_FH_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_rechitXvsZ_FH[i][j]= new TH2F(hname,hname,400,200,600,600,-300,300); */
 
-	  sprintf(hname1,"h_bin_rechitX_AH_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_rechitX_AH[i][j]= new TH1F(hname1,hname1,600,-300,300);
-          sprintf(hname1,"h_bin_rechitY_AH_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_rechitY_AH[i][j]= new TH1F(hname1,hname1,600,-300,300);
-          sprintf(hname1,"h_bin_rechitZ_AH_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_rechitZ_AH[i][j]= new TH1F(hname1,hname1,400,200,600);
+  /* 	  sprintf(hname1,"h_bin_rechitX_AH_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_rechitX_AH[i][j]= new TH1F(hname1,hname1,600,-300,300); */
+  /*         sprintf(hname1,"h_bin_rechitY_AH_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_rechitY_AH[i][j]= new TH1F(hname1,hname1,600,-300,300); */
+  /*         sprintf(hname1,"h_bin_rechitZ_AH_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_rechitZ_AH[i][j]= new TH1F(hname1,hname1,400,200,600); */
 
-          sprintf(hname1,"h_bin_rechitEnergy_Mips_AH_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_rechitEn_Mips_AH[i][j]= new TH1F(hname1,hname1,10000,0,1000);
-          sprintf(hname1,"h_bin_rechitEnergy_AH_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_rechitEn_AH[i][j]=new TH1F(hname1,hname1,500,0,500);
-          sprintf(hname,"h_bin_rechitXvsY_AH_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_rechitXvsY_AH[i][j]= new TH2F(hname,hname,600,-300,300,600,-300,300);
-          sprintf(hname,"h_bin_rechitXvsZ_AH_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_rechitXvsZ_AH[i][j]= new TH2F(hname,hname,400,200,600,600,-300,300);
+  /*         sprintf(hname1,"h_bin_rechitEnergy_Mips_AH_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_rechitEn_Mips_AH[i][j]= new TH1F(hname1,hname1,10000,0,1000); */
+  /*         sprintf(hname1,"h_bin_rechitEnergy_AH_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_rechitEn_AH[i][j]=new TH1F(hname1,hname1,500,0,500); */
+  /*         sprintf(hname,"h_bin_rechitXvsY_AH_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_rechitXvsY_AH[i][j]= new TH2F(hname,hname,600,-300,300,600,-300,300); */
+  /*         sprintf(hname,"h_bin_rechitXvsZ_AH_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_rechitXvsZ_AH[i][j]= new TH2F(hname,hname,400,200,600,600,-300,300); */
 
 
-	  sprintf(hname,"h_bin_rechitXvsY_EE_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-	  h_bin_rechitXvsY_EE[i][j]= new TH2F(hname,hname,600,-300,300,600,-300,300);
-	  sprintf(hname,"h_bin_rechitXvsZ_EE_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-	  h_bin_rechitXvsZ_EE[i][j]= new TH2F(hname,hname,400,200,600,600,-300,300);
+  /* 	  sprintf(hname,"h_bin_rechitXvsY_EE_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /* 	  h_bin_rechitXvsY_EE[i][j]= new TH2F(hname,hname,600,-300,300,600,-300,300); */
+  /* 	  sprintf(hname,"h_bin_rechitXvsZ_EE_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /* 	  h_bin_rechitXvsZ_EE[i][j]= new TH2F(hname,hname,400,200,600,600,-300,300); */
 
 	  
-	  sprintf(hname1,"h_bin_nrechits_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-	  h_bin_nrechits[i][j]= new TH1F(hname1,hname1,600,0,6000);
-	  sprintf(hname1,"h_bin_TotalrechitEn_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
+  /* 	  sprintf(hname1,"h_bin_nrechits_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /* 	  h_bin_nrechits[i][j]= new TH1F(hname1,hname1,600,0,6000); */
+  /* 	  sprintf(hname1,"h_bin_TotalrechitEn_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
 	  
-	  int ibin=0,xhigh=0;
-	  if(Elist[j]<100)
-	    {
-	      ibin= 5*Elist[j];
-	      xhigh = ibin;
-	      ibin=500;
-	    }
-	  else
-	    {
-	      ibin = 5.0*Elist[j];
-	      xhigh = ibin;
-	      ibin=500;
-	    }
+  /* 	  int ibin=0,xhigh=0; */
+  /* 	  if(Elist[j]<100) */
+  /* 	    { */
+  /* 	      ibin= 5*Elist[j]; */
+  /* 	      xhigh = ibin; */
+  /* 	      ibin=500; */
+  /* 	    } */
+  /* 	  else */
+  /* 	    { */
+  /* 	      ibin = 5.0*Elist[j]; */
+  /* 	      xhigh = ibin; */
+  /* 	      ibin=500; */
+  /* 	    } */
 	  
-	  h_bin_TotalrechitEn[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh);
-	  sprintf(hname1,"h_bin_TotalrechitEn_EE_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-	  h_bin_TotalrechitEn_EE[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh);
-	  sprintf(hname1,"h_bin_TotalrechitEn_FH_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_TotalrechitEn_FH[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh);
-	  sprintf(hname1,"h_bin_TotalrechitEn_AH_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_TotalrechitEn_AH[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh);
+  /* 	  h_bin_TotalrechitEn[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh); */
+  /* 	  sprintf(hname1,"h_bin_TotalrechitEn_EE_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /* 	  h_bin_TotalrechitEn_EE[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh); */
+  /* 	  sprintf(hname1,"h_bin_TotalrechitEn_FH_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_TotalrechitEn_FH[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh); */
+  /* 	  sprintf(hname1,"h_bin_TotalrechitEn_AH_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_TotalrechitEn_AH[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh); */
 
-	  ibin = 1000*Elist[j];
-	  xhigh = ibin;
-	  ibin= 10000;
-	  xhigh = 10000;
-	  sprintf(hname1,"h_bin_total_Mips_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-	  h_bin_total_Mips[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh);
-          sprintf(hname1,"h_bin_total_Mips_EE_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_total_Mips_EE[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh);
-          sprintf(hname1,"h_bin_total_Mips_FH_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_total_Mips_FH[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh);
-          sprintf(hname1,"h_bin_total_Mips_AH_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_total_Mips_AH[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh);
+  /* 	  ibin = 1000*Elist[j]; */
+  /* 	  xhigh = ibin; */
+  /* 	  ibin= 10000; */
+  /* 	  xhigh = 10000; */
+  /* 	  sprintf(hname1,"h_bin_total_Mips_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /* 	  h_bin_total_Mips[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh); */
+  /*         sprintf(hname1,"h_bin_total_Mips_EE_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_total_Mips_EE[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh); */
+  /*         sprintf(hname1,"h_bin_total_Mips_FH_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_total_Mips_FH[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh); */
+  /*         sprintf(hname1,"h_bin_total_Mips_AH_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_total_Mips_AH[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh); */
 
-	  /* sprintf(hname1,"h_bin_total_Mips_EE_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
-          /* h_bin_total_Mips_EE[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh); */
-	  ibin= 40000;
-          xhigh = 40000;
+  /* 	  /\* sprintf(hname1,"h_bin_total_Mips_EE_%s_TrueEn_%d",dr_cuts[i],Elist[j]); *\/ */
+  /*         /\* h_bin_total_Mips_EE[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh); *\/ */
+  /* 	  ibin= 40000; */
+  /*         xhigh = 40000; */
 
-	  sprintf(hname1,"h_bin_total_Mips_EE_v1_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_total_Mips_EE_v1[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh);
-	  sprintf(hname1,"h_bin_total_Mips_FH_v1_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_total_Mips_FH_v1[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh);
+  /* 	  sprintf(hname1,"h_bin_total_Mips_EE_v1_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_total_Mips_EE_v1[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh); */
+  /* 	  sprintf(hname1,"h_bin_total_Mips_FH_v1_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_total_Mips_FH_v1[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh); */
 
-	  ibin = 500;
-	  xhigh = 50;
-	  sprintf(hname1,"h_bin_ratiorechitEn_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-	  h_bin_ratiorechitEn[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh);
-          sprintf(hname1,"h_bin_ratiorechitEn_EE_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_ratiorechitEn_EE[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh);
-          sprintf(hname1,"h_bin_ratiorechitEn_FH_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_ratiorechitEn_FH[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh);
-          sprintf(hname1,"h_bin_ratiorechitEn_AH_%s_TrueEn_%d",dr_cuts[i],Elist[j]);
-          h_bin_ratiorechitEn_AH[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh);
+  /* 	  ibin = 500; */
+  /* 	  xhigh = 50; */
+  /* 	  sprintf(hname1,"h_bin_ratiorechitEn_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /* 	  h_bin_ratiorechitEn[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh); */
+  /*         sprintf(hname1,"h_bin_ratiorechitEn_EE_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_ratiorechitEn_EE[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh); */
+  /*         sprintf(hname1,"h_bin_ratiorechitEn_FH_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_ratiorechitEn_FH[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh); */
+  /*         sprintf(hname1,"h_bin_ratiorechitEn_AH_%s_TrueEn_%d",dr_cuts[i],Elist[j]); */
+  /*         h_bin_ratiorechitEn_AH[i][j]= new TH1F(hname1,hname1,ibin,0,xhigh); */
 	  
 	  
 
 
-	}
+  /* 	} */
 
-    }
+  /*   } */
+  int nsc=0, sec_kin_max=0;
+  for(int ien=0;ien<8;ien++){
+    sec_kin_max=0;
+    sec_kin_max=Elist[ien]*(3.0/2.0);
+    nsc =0;
+    nsc= 2*Elist[ien];
+    sprintf(hname,"h_2D_nsc_correlation_En_%d",Elist[ien]);
+    h_2D_nsc_correlation[ien] = new TH2F(hname,"h_2D_nsc_correlation",sec_kin_max*5,0.0,sec_kin_max,nsc,0.0,nsc);
+    h_2D_nsc_correlation[ien]->GetXaxis()->SetTitle("Kinetic energy Sum of Secondaries [GeV] ");
+    h_2D_nsc_correlation[ien]->GetYaxis()->SetTitle("# of Generated Secondaries ");
+    sprintf(hname,"h_2D_nsc_correlation_frac_En_%d",Elist[ien]);
+
+    h_2D_nsc_correlation_frac[ien] = new TH2F(hname,"h_2D_nsc_correlation_frac",100.0,0.0,1.0,nsc,0.0,nsc);
+    h_2D_nsc_correlation_frac[ien]->GetXaxis()->SetTitle("Fractional Kinetic energy Sum of Secondaries");
+    h_2D_nsc_correlation_frac[ien]->GetYaxis()->SetTitle("# of Secondaries ");
+    sprintf(hname,"h_2D_hlead_sec_frac_En_%d",Elist[ien]);
+
+    h_2D_hlead_sec_frac[ien] = new TH2F(hname,"h_2D_hlead_sec_frac",100.0,0.0,1.0,100.0,0.0,1.0);
+    h_2D_hlead_sec_frac[ien]->GetXaxis()->SetTitle("Fractional Kinetic energy Sum of Secondaries ");
+    h_2D_hlead_sec_frac[ien]->GetYaxis()->SetTitle("Fractional Kinetic energy of leadind #pi^{-}");
+
+    sprintf(hname,"h_nsc_En_%d",Elist[ien]);
+    h_nsc[ien] = new TH1F(hname,"h_nsc",nsc,0.0,nsc);
+    sprintf(hname,"h_seckin_En_%d",Elist[ien]);
+
+    h_seckin[ien] = new TH1F(hname,"h_seckin",100,0,1);//sec_kin_max*5,0.0,sec_kin_max);                                                                                
+    sprintf(hname,"h_had_leading_KE_En_%d",Elist[ien]);
+
+    h_had_leading_KE[ien] = new TH1F(hname,"h_had_leading_KE",100,0,1);//sec_kin_max*5,0.0,sec_kin_max);                                                                
+    sprintf(hname,"h_gen_kin_En_%d",Elist[ien]);
+
+    h_gen_kin[ien] = new TH1F(hname,"h_gen_kin",100,0,1);//sec_kin_max*5,0.0,sec_kin_max);                                                                              
+    sprintf(hname,"h_Allsec_kin_En_%d",Elist[ien]);
+
+    h_Allsec_kin[ien] = new TH1F(hname,"Allsecondary -pi0+k0",100,0,1);//sec_kin_max*5,0.0,sec_kin_max);                                                                
+    sprintf(hname,"h_Allsec_kin_kaons_En_%d",Elist[ien]);
+
+    h_Allsec_kin_kaons[ien] = new TH1F(hname,"Allsecondary-k0",100,0,1);//sec_kin_max*5,0.0,sec_kin_max);                                                               
+    sprintf(hname,"h_Allsec_kin_pions_En_%d",Elist[ien]);
+
+    h_Allsec_kin_pions[ien] = new TH1F(hname,"Allsecondary-pi0",100,0,1);//sec_kin_max*5,0.0,sec_kin_max);                                                              
+
+  }
 
 }
 AnalyzeHGCOctTB::AnalyzeHGCOctTB(const TString &inputFileList, const char *outFileName, const char* energy) {

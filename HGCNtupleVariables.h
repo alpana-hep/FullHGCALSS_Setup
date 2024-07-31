@@ -21,6 +21,7 @@ public :
   /* void    Init(TTree *tree); */
   /* Bool_t  Notify(); */
   Int_t   GetEntry(Long64_t entry, Int_t getall = 0) { return fChain ? fChain->GetTree()->GetEntry(entry, getall) : 0; }
+  double getLeadingKE(vector<double> list);
 
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
@@ -43,12 +44,20 @@ public :
    Bool_t          hit_si[5621];   //[nhits]                                                                                                      
    Int_t           hit_lay[5621];   //[nhits]                                                                                                     
    Float_t         hit_x[5621];   //[nhits]                                                                                                       
-   Float_t         hit_y[5621];   //[nhits]                                                                                                       
+   Float_t         hit_y[5621];   //[nhits]                                                                                                      
+   Float_t EneTotal;
+   Float_t avg_emFrac_total;
+   Float_t avg_hadFrac_total;
+
+ 
    Float_t         hit_z[5621];   //[nhits]                                                                                                       
    Float_t         hit_men[5621];   //[nhits]                                                                                                     
    Float_t         hit_en[5621];   //[nhits]                                                                                                      
    Float_t         hit_endens[5621];   //[nhits]                                                                                                  
-   Float_t         hit_dR[5621];   //[nhits]                                                                                                      
+   Float_t         hit_dR[5621];   //[nhits]                                                                                                     
+Float_t         lay_emEne[47];
+   Float_t         lay_hadEne[47];
+   //   Float_t         totalE[47];
    Float_t         hit_dRho[5621];   //[nhits]                                                                                                   
  Float_t         hit_time[5621];
    Float_t         hit_miss[47];
@@ -59,6 +68,29 @@ public :
    Float_t         total_sim_men[47];
    Float_t         avg_emFrac[47];
    Float_t         avg_hadFrac[47];
+   Float_t         measuredE[47];
+   Float_t         absorberE[47];
+   Float_t         totalE[47];
+   Int_t           nSec;
+   Float_t         int_x[999];
+   Float_t         int_y[999];
+   Float_t         int_z[999];
+   Float_t         sec_pdgID[999];   //[nSec]                                                                                                    
+   Float_t lay_num;
+   Float_t         sec_charge[999];   //[nSec]                                                                                                    
+   Float_t         sec_kin[999];   //[nSec]                  
+   Int_t           nparticle;
+   Float_t         particle_x[999];   //[nparticle]                                                                                               
+   Float_t         particle_y[999];   //[nparticle]                                                                                               
+   Float_t         particle_z[999];   //[nparticle]                                                                                               
+   Float_t         particle_pdgID[999];   //[nparticle]                                                                                           
+   Float_t         particle_charge[999];   //[nparticle]                                                                                          
+   Float_t         particle_kin[999];   //[nparticle]                                                                                             
+   Float_t         particle_process_id[999];   //[nparticle]                                                                                      
+   Float_t         particle_parent_id[999];   //[nparticle]                         
+   Float_t         particle_track_id[999];   //[nparticle]                                                                                        
+   vector<string>  *particle_creator_process;
+
 
    /* Int_t           hit_sithick[2689];   //[nhits] */
    /* Bool_t          hit_si[2689];   //[nhits] */
@@ -112,6 +144,32 @@ public :
    TBranch        *b_avg_emFrac;   //!
    TBranch        *b_hit_time;
    TBranch        *b_avg_hadFrac;   //!
+   TBranch        *b_lay_emEne;   //!                                                                                                             
+   TBranch        *b_lay_hadEne;   //!                                                                                                            
+   TBranch        *b_avg_emFrac_total;   //!                                                                                                      
+   TBranch        *b_avg_hadFrac_total;   //!                                                                                                     
+   TBranch        *b_measuredE;   //!                            
+   TBranch        *b_absorberE;   //!                                                                                                             
+   TBranch        *b_totalE;   //!                                                                                                                
+   TBranch        *b_nSec;   //!                                                                                                                  
+   TBranch        *b_int_x;   //!                                                                                                                 
+   TBranch        *b_int_y;   //!                                                                                                                 
+   TBranch        *b_int_z;   //!                                                                                                                 
+   TBranch        *b_sec_pdgID;   //!                                                                                                             
+   TBranch        *b_sec_charge;   //!                                                                                                            
+   TBranch        *b_sec_kin;   //!                
+   TBranch        *b_nparticle;   //!                                                                                                             
+   TBranch        *b_particle_x;   //!                                                                                                            
+   TBranch        *b_particle_y;   //!                                                                                                            
+   TBranch        *b_particle_z;   //!                                                                                                            
+   TBranch        *b_particle_pdgID;   //!                                                                                                        
+   TBranch        *b_particle_charge;   //!                                                                                                       
+   TBranch        *b_particle_kin;   //!                                                                                                          
+   TBranch        *b_particle_process_id;   //!                                                                                                   
+   TBranch        *b_particle_parent_id;   //!                                                                                                    
+   TBranch        *b_particle_track_id;   //!                                                                                                     
+   TBranch        *b_particle_creator_process;   //!                                                                                              
+
 
    //   HGCNtupleVariables(TTree);
    //virtual ~HGCNtupleVariables();
@@ -119,7 +177,7 @@ public :
    //   virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop();
+   /* virtual void     Loop(); */
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 };
@@ -209,6 +267,19 @@ void HGCNtupleVariables::Init(TTree *tree)
   total_sim_men[47]={};
   avg_emFrac[47]={};
   avg_hadFrac[47]={};
+  EneTotal=0;
+  lay_emEne[47]={},avg_hadFrac[47]={};
+  avg_emFrac_total=0, avg_hadFrac_total=0,EneTotal=0;
+  particle_charge[999]={},particle_kin[999]={},particle_x[999]={},particle_y[999]={}, particle_z[999]={};
+  lay_num=0;
+  nSec=0, sec_pdgID[999]={},sec_charge[999]={},sec_kin[999]={};
+  int_x[999]={},int_y[999]={},int_z[99]={};
+  nparticle=0;
+  particle_pdgID[999]={},particle_process_id[999]={},particle_parent_id[999]={},particle_track_id[999]={};
+  particle_creator_process=0;
+  measuredE[47]={};
+  absorberE[47]={};
+  totalE[47]={};
 
    if (!tree) return;
    fChain = tree;
@@ -246,6 +317,31 @@ void HGCNtupleVariables::Init(TTree *tree)
    fChain->SetBranchAddress("total_sim_men", total_sim_men, &b_total_sim_men);
    fChain->SetBranchAddress("avg_emFrac", avg_emFrac, &b_avg_emFrac);
    fChain->SetBranchAddress("avg_hadFrac", avg_hadFrac, &b_avg_hadFrac);
+   fChain->SetBranchAddress("lay_emEne", lay_emEne, &b_lay_emEne);
+   fChain->SetBranchAddress("lay_hadEne", lay_hadEne, &b_lay_hadEne);
+   fChain->SetBranchAddress("avg_emFrac_total", &avg_emFrac_total, &b_avg_emFrac_total);
+   fChain->SetBranchAddress("avg_hadFrac_total", &avg_hadFrac_total, &b_avg_hadFrac_total);
+   fChain->SetBranchAddress("measuredE", measuredE, &b_measuredE);
+   fChain->SetBranchAddress("absorberE", absorberE, &b_absorberE);
+   fChain->SetBranchAddress("totalE", totalE, &b_totalE);
+   fChain->SetBranchAddress("nSec", &nSec, &b_nSec);
+   fChain->SetBranchAddress("int_x", &int_x, &b_int_x);
+   fChain->SetBranchAddress("int_y", &int_y, &b_int_y);
+   fChain->SetBranchAddress("int_z", &int_z, &b_int_z);
+   fChain->SetBranchAddress("sec_pdgID", sec_pdgID, &b_sec_pdgID);
+   fChain->SetBranchAddress("sec_charge", sec_charge, &b_sec_charge);
+   fChain->SetBranchAddress("sec_kin", sec_kin, &b_sec_kin);
+   fChain->SetBranchAddress("nparticle", &nparticle, &b_nparticle);
+   fChain->SetBranchAddress("particle_x", particle_x, &b_particle_x);
+   fChain->SetBranchAddress("particle_y", particle_y, &b_particle_y);
+   fChain->SetBranchAddress("particle_z", particle_z, &b_particle_z);
+   fChain->SetBranchAddress("particle_pdgID", particle_pdgID, &b_particle_pdgID);
+   fChain->SetBranchAddress("particle_charge", particle_charge, &b_particle_charge);
+   fChain->SetBranchAddress("particle_kin", particle_kin, &b_particle_kin);
+   fChain->SetBranchAddress("particle_process_id", particle_process_id, &b_particle_process_id);
+   fChain->SetBranchAddress("particle_parent_id", particle_parent_id, &b_particle_parent_id);
+   fChain->SetBranchAddress("particle_track_id", particle_track_id, &b_particle_track_id);
+   fChain->SetBranchAddress("particle_creator_process", &particle_creator_process, &b_particle_creator_process);
    Notify();
 }
 

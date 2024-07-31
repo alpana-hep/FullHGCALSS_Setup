@@ -8,6 +8,8 @@
 #include <math.h>
 #include<TF1.h>
 #define MAXHITS 50000
+#define MAXSEC 1000
+
 #include "Math/Vector3D.h"
 #include "Math/Vector3Dfwd.h"
 #include "Math/Point2D.h"
@@ -86,8 +88,8 @@ void AnalyzeHGCOctTB::EventLoop(const char *energy) {
 
   int decade = 0;
   char* outFileName = new char[1000];
-
-  sprintf(outFileName,"./SkimmedFiles_8enPoint_wFullHGCAlSS_ntuple_8kevents_model2_version73_13June2023.root");//,energy);                                                
+  int en = atoi(energy);
+  sprintf(outFileName,"./SkimmedFiles_wFullHGCAlSS_ntuple_model2_version73_Enegry%d.root",en);                                                
  int pNPhysLayers =47;
  TFile* outfile = TFile::Open(outFileName,"recreate");
  outfile->cd();
@@ -106,6 +108,29 @@ void AnalyzeHGCOctTB::EventLoop(const char *energy) {
   pi_sci_clustsumen[5][pNPhysLayers]={};
   Float_t pi_hit_miss[pNPhysLayers]={};
   Float_t pi_total_sim_men[pNPhysLayers]={},pi_avg_emFrac[pNPhysLayers]={},pi_avg_hadFrac[pNPhysLayers]={};
+                                                
+  Float_t pi_avg_emFrac_total, pi_avg_hadFrac_total, pi_EneTotal,pi_lay_emEne[pNPhysLayers],pi_lay_hadEne[pNPhysLayers];
+  Float_t pi_particle_charge[MAXSEC], pi_particle_kin[MAXSEC], pi_particle_x[MAXSEC], pi_particle_y[MAXSEC], pi_particle_z[MAXSEC];
+
+  // Float_t pi_particle_x,pi_particle_y,pi_particle_z,pi_particle_charge,pi_particle_kin,pi_particle_track_id,pi_particle_parent_id;
+  Int_t pi_lay_num;
+  Int_t pi_nSec;
+  Float_t pi_sec_pdgID[MAXSEC], pi_sec_charge[MAXSEC], pi_sec_kin[MAXSEC], pi_int_x[MAXSEC], pi_int_y[MAXSEC], pi_int_z[MAXSEC];
+
+  Int_t pi_nparticle;
+  Float_t pi_particle_pdgID[MAXSEC], pi_article_charge[MAXSEC], pi_article_kin[MAXSEC], pi_article_x[MAXSEC], pi_article_y[MAXSEC], pi_article_z[MAXSEC];
+  Float_t pi_particle_process_id[MAXSEC], pi_particle_parent_id[MAXSEC], pi_particle_track_id[MAXSEC];
+  std::vector<std::string> *pi_particle_creator_process;
+  Float_t pi_measuredE[pNPhysLayers], pi_absorberE[pNPhysLayers], pi_totalE[pNPhysLayers];
+  Double_t pi_leadingHadKE;
+  Double_t pi_E_genKin;
+  Double_t pi_nsc_total_KE;
+  Double_t pi_Allsec_pions;
+  Double_t pi_Allsec_Kaons;
+  Double_t pi_Allseckin;
+  int Nrechit_trimAhcal;
+
+
   hitTree->Branch("Event", Event,"pi_Event/I");
   hitTree->Branch("nHadrons",    pi_nHadrons,   Form("pi_nHadrons[%d]/I",pNPhysLayers) );
   hitTree->Branch("nGammas",     pi_nGammas,    Form("pi_nGammas[%d]/I",pNPhysLayers) );
@@ -137,6 +162,41 @@ void AnalyzeHGCOctTB::EventLoop(const char *energy) {
   hitTree->Branch("total_sim_men",  pi_total_sim_men,  Form("pi_total_sim_men[%d]/F",pNPhysLayers));
   hitTree->Branch("avg_emFrac",  pi_avg_emFrac,  Form("pi_avg_emFrac[%d]/F",pNPhysLayers));
   hitTree->Branch("avg_hadFrac",  pi_avg_hadFrac,  Form("pi_avg_hadFrac[%d]/F",pNPhysLayers));
+  hitTree->Branch("lay_emEne",  pi_lay_emEne,  Form("pi_lay_emEne[%d]/F",pNPhysLayers));
+  hitTree->Branch("lay_hadEne",  pi_lay_hadEne,  Form("pi_lay_hadEne[%d]/F",pNPhysLayers));
+  hitTree->Branch("avg_emFrac_total",  &pi_avg_emFrac_total,  "pi_avg_emFrac_total/F");
+  hitTree->Branch("avg_hadFrac_total",  &pi_avg_hadFrac_total,  "pi_avg_hadFrac_total/F");
+
+  hitTree->Branch("measuredE",  pi_measuredE,  Form("pi_measuredE[%d]/F",pNPhysLayers));
+  hitTree->Branch("absorberE",  pi_absorberE,  Form("pi_absorberE[%d]/F",pNPhysLayers));
+  hitTree->Branch("totalE",  pi_totalE,  Form("pi_totalE[%d]/F",pNPhysLayers));
+
+  hitTree->Branch("nSec",  &pi_nSec,   "pi_nSec/I");
+  hitTree->Branch("int_x",  pi_int_x,  "pi_int_x[pi_nSec]/F");
+  hitTree->Branch("int_y",  pi_int_y,   "pi_int_y[pi_nSec]/F");
+  hitTree->Branch("int_z",  pi_int_z,   "pi_int_z[pi_nSec]/F");
+  hitTree->Branch("sec_pdgID",   pi_sec_pdgID,   "pi_sec_pdgID[pi_nSec]/F");
+  hitTree->Branch("sec_charge",   pi_sec_charge,   "pi_sec_charge[pi_nSec]/F");
+  hitTree->Branch("sec_kin",   pi_sec_kin,   "pi_sec_kin[pi_nSec]/F");
+
+  hitTree->Branch("nparticle",  &pi_nparticle,   "pi_nparticle/I");
+  hitTree->Branch("particle_x",  pi_particle_x,   "pi_particle_x[pi_nparticle]/F");
+  hitTree->Branch("particle_y",  pi_particle_y,   "pi_particle_y[pi_nparticle]/F");
+  hitTree->Branch("particle_z",  pi_particle_z,   "pi_particle_z[pi_nparticle]/F");
+  hitTree->Branch("particle_pdgID",   pi_particle_pdgID,   "pi_particle_pdgID[pi_nparticle]/F");
+  hitTree->Branch("particle_charge",   pi_particle_charge,   "pi_particle_charge[pi_nparticle]/F");
+  hitTree->Branch("particle_kin",   pi_particle_kin,   "pi_particle_kin[pi_nparticle]/F");
+  hitTree->Branch("particle_process_id",   pi_particle_process_id,   "pi_particle_process_id[pi_nparticle]/F");
+  hitTree->Branch("particle_parent_id",   pi_particle_parent_id,   "pi_particle_parent_id[pi_nparticle]/F");
+  hitTree->Branch("particle_track_id",   pi_particle_track_id,   "pi_particle_track_id[pi_nparticle]/F");
+  hitTree->Branch("particle_creator_process",   &pi_particle_creator_process);
+  hitTree->Branch("leadingHadKE", &pi_leadingHadKE);
+  hitTree->Branch("E_genKin", &pi_E_genKin);
+  hitTree->Branch("nsc_total_KE",&pi_nsc_total_KE);
+  hitTree->Branch("Allsec_pions",&pi_Allsec_pions);
+  hitTree->Branch("Allsec_Kaons",&pi_Allsec_Kaons);
+  hitTree->Branch("Allseckin",&pi_Allseckin);
+  
   hitTree->SetAutoFlush(1000);
   //  hitTree->SetDirectory(outputFile);
 
@@ -170,30 +230,33 @@ void AnalyzeHGCOctTB::EventLoop(const char *energy) {
 
      ////   MESSAGE ////
       int i_en =0;
+      //      if(genEn!=200) continue;
       // apparently code is not running beyond this point ///
-      for (int i=10;i<351;i++)
-        {
-          if(int(genEn)==i)
-            {
-              // if(count[i]>8000)
-              //   break;
+      // for (int i=10;i<351;i++)
+      //   {
+      //     if(int(genEn)==i)
+      //       {
+      //         // if(count[i]>8000)
+      //         //   break;
 
-              //hitTree->Fill();                                                                                                                 
-	      i_en = i;
-              count[i]++;
-            }
-        }
-      if(count[i_en]>8000)
-	{//cout<<"final"<<endl;
-	  flag_en[i_en] = true;
-	  //eak;
-	}
+      //         //hitTree->Fill();                                                                                                                 
+      // 	      i_en = i;
+      //         count[i]++;
+      //       }
+      //   }
+      // if(count[i_en]>8000)
+      // 	{//cout<<"final"<<endl;
+      // 	  flag_en[i_en] = true;
+      // 	  //eak;
+      // 	}
       //      cout<<i_en<<"\t"<<count[i_en]<<endl;
       h_beamenergy->Fill(genEn);
       h_particle->Fill(genId);
       //      h_true_beamenergy->Fill(genEn);
 
       // //initialize
+      if(DEBUG)
+	cout<<jentry<<" just before the branch initialisation  "<<endl;
        pi_genId=0.0;
        pi_nHadrons[pNPhysLayers]={},pi_nGammas[pNPhysLayers]={},pi_nMuons[pNPhysLayers]={},pi_nElectrons[pNPhysLayers]={};
        pi_genEn=0.0,pi_genEt=0.0,pi_genEta=0.0,pi_genPhi=0.0;
@@ -209,13 +272,47 @@ void AnalyzeHGCOctTB::EventLoop(const char *energy) {
        pi_total_sim_men[pNPhysLayers]={},pi_avg_emFrac[pNPhysLayers]={},pi_avg_hadFrac[pNPhysLayers]={};
        pi_Event=0;
        pi_genEn=0.0,pi_genEt=0.0,pi_genEta=0.0,pi_genPhi=0.0;
+       pi_leadingHadKE = 0;
+       pi_E_genKin = 0;
+       pi_nsc_total_KE = 0;
+       pi_Allsec_pions = 0;
+       pi_Allsec_Kaons = 0;
+       pi_Allseckin =0;
+
+
+       // additonal variables
+       pi_EneTotal=0;
+       pi_lay_emEne[pNPhysLayers]={},pi_avg_hadFrac[pNPhysLayers]={};
+       pi_avg_emFrac_total=0, pi_avg_hadFrac_total=0,pi_EneTotal=0;
+       pi_particle_charge[MAXSEC]={},pi_particle_kin[MAXSEC]={},pi_particle_x[MAXSEC]={},pi_particle_y[MAXSEC]={}, pi_particle_z[MAXSEC]={};
+       pi_lay_num=0;
+       pi_nSec=0, pi_sec_pdgID[MAXSEC]={},pi_sec_charge[MAXSEC]={},pi_sec_kin[MAXSEC]={};
+       pi_int_x[MAXSEC]={},pi_int_y[MAXSEC]={},pi_int_z[MAXSEC]={};
+       pi_nparticle=0;
+       pi_particle_pdgID[MAXSEC]={},pi_particle_process_id[MAXSEC]={},pi_particle_parent_id[MAXSEC]={},pi_particle_track_id[MAXSEC]={};
+       pi_particle_creator_process->clear();
+       pi_measuredE[pNPhysLayers]={};
+       pi_absorberE[pNPhysLayers]={};
+       pi_totalE[pNPhysLayers]={};
       // //filling the branches
+       if(DEBUG)
+	 cout<<jentry<<" just after finishing intialisation  "<<endl;
+
       pi_Event= Event;
       pi_genEn = genEn;
       pi_genEt = genEt;
       pi_genEta = genEta;
       pi_genPhi = genPhi;
       pi_genId= genId;
+      //additonal variables
+      pi_EneTotal = EneTotal;
+      pi_avg_emFrac_total =avg_emFrac_total;
+      pi_avg_hadFrac_total = avg_hadFrac_total;
+      pi_nSec = nSec;
+      // pi_int_x = int_x;
+      // pi_int_y = int_y; 
+      // pi_int_z = int_z; 
+      pi_nparticle = nparticle;
       for(int il=0;il<47;il++)
       	{
       	  pi_hit_miss[il] = hit_miss[il];
@@ -229,8 +326,41 @@ void AnalyzeHGCOctTB::EventLoop(const char *energy) {
       	  pi_nElectrons[il] = nElectrons[il];
       	  pi_si_sumen[il] = si_sumen[il];
       	  pi_sci_sumen[il]= sci_sumen[il];
+	  pi_lay_emEne[il] = lay_emEne[il];
+	  pi_avg_hadFrac[il]= avg_hadFrac[il];
+	  pi_measuredE[il]= measuredE[il];
+	  pi_absorberE[il]=absorberE[il];
+	  pi_totalE[il]=totalE[il];
 	  
       	}
+      for (int is=0; is<nSec;is++)
+	{
+	  pi_sec_pdgID[is]= sec_pdgID[is];
+	  pi_sec_charge[is]=sec_charge[is];
+	  pi_sec_kin[is]= sec_kin[is];
+	  pi_int_x[is]= int_x[is];
+	  pi_int_y[is]= int_y[is];
+	  pi_int_z[is]= int_z[is];
+	}
+      if(DEBUG)
+	cout<<jentry<<" just before filling particle process "<<endl;
+
+      for(int ip=0; ip<nparticle;ip++)
+      	{
+      	  pi_particle_pdgID[ip]=particle_pdgID[ip];
+      	  pi_particle_process_id[ip]=particle_process_id[ip];
+      	  pi_particle_parent_id[ip]= particle_parent_id[ip];
+      	  pi_particle_track_id[ip] = particle_track_id[ip];
+	  //      	  pi_particle_creator_process[ip] = particle_creator_process[ip];
+      	  pi_particle_x[ip] = particle_x[ip];
+      	  pi_particle_y[ip] = particle_y[ip];
+      	  pi_particle_z[ip] = particle_z[ip];
+      	  pi_particle_kin[ip]= particle_kin[ip];
+	  
+      	}
+      if(DEBUG)
+	cout<<jentry<<" just after finishing intialisation  "<<endl;
+
       for (int j =0; j<5;j++)
       	{
       	  //cout<<pi_si_clustsumen[4][0]<<"\t"<<pi_si_clustsumen[4][0]<<endl;
@@ -262,9 +392,95 @@ void AnalyzeHGCOctTB::EventLoop(const char *energy) {
 	    }
       	}
 
+      if(DEBUG)
+	cout<<jentry<<" just before the pi0 values  "<<endl;
+
       if (countt==0)
       	continue;
       pi_nhits = countt; 
+      double nsc_total_KE = 0.0;
+      vector<double> KE_list;
+      double leadingHadKE = 0.0;
+      double E_gen_kin = 0.0;
+      KE_list.clear();
+      double E_gen_kin_thres = 0.0;
+      double Allsec_pions =0.0 ;
+      double Allsec_kaons =0.0 ;
+      double AllsecKin=0.0;
+      double beamEnergy=0.0;
+      int counter=0;
+
+      beamEnergy = genEn;
+	//hadronic_int++;
+	for(int i = 0; i < nSec; i++) {
+	  nsc_total_KE += sec_kin[i];
+	  if(abs(sec_pdgID[i]) == 211 && sec_charge[i] == -1) KE_list.push_back(sec_kin[i]);
+	}
+	leadingHadKE = getLeadingKE(KE_list);
+	E_gen_kin = nsc_total_KE - leadingHadKE;
+	if(leadingHadKE > 0) {
+	  if(E_gen_kin > 10 && false) {
+	    cout<<jentry<<" NextClosestLayer is \t "<<endl;
+	  }
+          if(E_gen_kin < E_gen_kin_thres) continue;
+	  //          hard_hadronic_int++;
+
+          if(jentry < 20 && false) {
+            cout<<jentry<<" : "<<nSec<<" : "<<nsc_total_KE<< " : "<<leadingHadKE<<" : "<<E_gen_kin<<endl;
+	  }
+	}
+
+	if(E_gen_kin>beamEnergy) continue;
+	bool flag=0;
+	for(int i =0;i<nparticle;i++)
+	  {
+	    int j = i-1;
+	    if(j<0) j=0;
+	    flag=1;
+	    if(i!=0)
+	      flag = !((particle_x)[i]==(particle_x)[j] and (particle_y)[i]==(particle_y)[j] and (particle_z)[i]==(particle_z)[j] and (particle_pdgID)[i] ==(particle_pdgID)[j]and (particle_parent_id)[i] == (particle_parent_id)[j]);
+	    //      flag =1; //neutralizing the previous condition                                                                                                      
+	    // if(flag==1){                                                       
+	      
+	    if((particle_pdgID)[i]==111 and  (particle_process_id)[i]>=121)// and (particle_process_id)[i]<=151)
+	      Allsec_pions+=(particle_kin)[i];
+	    if((particle_pdgID)[i]==221 and  (particle_process_id)[i]>=121 )//and  (particle_process_id)[i]<=151)
+	      Allsec_kaons+=(particle_kin)[i];
+	    if(((particle_pdgID)[i]==221 || (particle_pdgID)[i]==111 ) && (particle_process_id)[i]>=121)// &&  (particle_process_id)[i]<=151)//(!((particle_x)[i]==(particle_x)[j] and (particle_y)[i]==(particle_y)[j]) and (particle_z)[i]==(particle_z)[j]))                                                                                          
+	  {
+	    AllsecKin+=(particle_kin)[i];
+	  }
+	  
+	  }
+	if(Allsec_pions>genEn)
+	  {counter++;
+	    cout<<"Alpana- AllsecKin "<<AllsecKin<<"\t"<<Allsec_kaons<<"\t"<<Allsec_pions<<"\t"<<leadingHadKE<<"\t"<<nsc_total_KE<<" nsc "<<nSec<<"\t"<<beamEnergy<<endl;
+	    continue;
+	  }
+	for(int ien=0;ien<8;ien++)
+	  {
+	    if(beamEnergy<=Elist[ien]+2 and beamEnergy>=Elist[ien]-2){
+	      h_2D_nsc_correlation[ien]->Fill(E_gen_kin,nSec);
+	      h_nsc[ien]->Fill(nSec/beamEnergy);
+	      h_seckin[ien]->Fill(nsc_total_KE/beamEnergy);
+	      h_had_leading_KE[ien]->Fill(leadingHadKE/beamEnergy);
+	      h_gen_kin[ien]->Fill(E_gen_kin/beamEnergy);
+	      h_2D_nsc_correlation_frac[ien]->Fill(E_gen_kin/beamEnergy,nSec);
+	      h_2D_hlead_sec_frac[ien]->Fill(E_gen_kin/beamEnergy,leadingHadKE/beamEnergy);
+	      h_Allsec_kin_kaons[ien]->Fill(Allsec_kaons/beamEnergy);
+	      h_Allsec_kin_pions[ien]->Fill(Allsec_pions/beamEnergy);
+	      h_Allsec_kin[ien]->Fill(AllsecKin/beamEnergy);
+	    }
+	  }
+	pi_leadingHadKE = leadingHadKE;
+	pi_E_genKin = E_gen_kin;
+	pi_nsc_total_KE = nsc_total_KE;
+	pi_Allsec_pions = Allsec_pions;
+	pi_Allsec_Kaons = Allsec_kaons;
+	pi_Allseckin =AllsecKin;
+
+		hitTree->Fill();      
+	h_true_beamenergy->Fill(genEn);  
       //      pi_nHadrons[pNPhysLayers] = nHadrons[pNPhysLayers];
       // for (int i=10;i<351;i++)
       // 	{
@@ -278,13 +494,13 @@ void AnalyzeHGCOctTB::EventLoop(const char *energy) {
       // 	    }
       // 	}
       //cout<<i_en<<"\t"<<count[i_en]<<endl;
-      if(!flag_en[i_en])
-	{
-	  hitTree->Fill();
+      // if(!flag_en[i_en])
+      // 	{
+      // 	  hitTree->Fill();
 
       
-	  h_true_beamenergy->Fill(genEn);
-	}
+      // 	  h_true_beamenergy->Fill(genEn);
+      // 	}
       //cout<<sizeof(hit_en[jentry])<<endl;
       // int Nrechits[5]={};
       // int Nrechit_en[5][8]={};
